@@ -1,6 +1,6 @@
 {
-  "name": "varth",
-  "version": "1.0.0",
+  "name": "var-th",
+  "version": "0.1.2",
   "description": "Generate CSS theme variables from a configuration object.",
   "keywords": [
     "css",
@@ -11,21 +11,21 @@
   ],
   "license": "MIT",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
     "./react": {
       "types": "./dist/react/index.d.ts",
-      "import": "./dist/react/index.js",
+      "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.cjs"
     }
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],

@@ -1,10 +1,10 @@
 # varth
 
 [![codecov](https://codecov.io/github/kirilinsky/varth/graph/badge.svg?token=AJLJGZVFSN)](https://codecov.io/github/kirilinsky/varth)
-[![npm downloads](https://img.shields.io/npm/dm/varth)](https://www.npmjs.com/package/varth)
-[![npm](https://img.shields.io/npm/v/varth)](https://www.npmjs.com/package/varth)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/varth)](https://bundlephobia.com/package/varth)
-[![license](https://img.shields.io/npm/l/varth)](./LICENSE)
+[![npm downloads](https://img.shields.io/npm/dm/var-th)](https://www.npmjs.com/package/var-th)
+[![npm](https://img.shields.io/npm/v/var-th)](https://www.npmjs.com/package/var-th)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/var-th)](https://bundlephobia.com/package/var-th)
+[![license](https://img.shields.io/npm/l/var-th)](./LICENSE)
 
 <img src="https://i.ibb.co/ynfnTPZs/varth-logo.jpg" alt="var-th" />
 
@@ -13,7 +13,7 @@ Type-safe CSS variable themes. Define once, use everywhere.
 ## Install
 
 ```bash
-npm install varth
+npm install var-th
 ```
 
 ## What it does
@@ -21,7 +21,7 @@ npm install varth
 You define your themes in one place as compact arrays. varth turns them into CSS custom properties and gives you a type-safe way to apply them.
 
 ```ts
-import { defineThemes } from "varth";
+import { defineThemes } from "var-th";
 
 const { getVarths, inject, toCSS, toTypes } = defineThemes({
   prefix: "ui",
@@ -103,7 +103,7 @@ export type ThemeName = "light" | "dark";
 ## React
 
 ```tsx
-import { ThemeProvider, useTheme } from 'varth/react'
+import { ThemeProvider, useTheme } from 'var-th/react'
 
 // wrap your app
 <ThemeProvider default="light" inject={inject} themeNames={themeNames}>
