@@ -1,7 +1,7 @@
 export type TokenKeys = readonly string[];
 
 export type DefineThemesConfig = {
-  prefix: string;
+  prefix?: string;
   tokens: readonly string[];
   themes: Record<string, readonly string[]>;
 };

@@ -1,5 +1,11 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
+type ThemeContextValue = {
+  theme: string;
+  setTheme: (theme: string) => void;
+  themeNames: readonly string[];
+};
+
 type ThemeProviderProps = {
   children: React.ReactNode;
   default: string;
@@ -7,32 +13,26 @@ type ThemeProviderProps = {
   inject: () => void;
 };
 
-type ThemeContextValue = {
-  theme: string;
-  setTheme: (theme: string) => void;
-  themeNames: readonly string[];
-};
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+const Ctx = createContext<ThemeContextValue | null>(null);
 
 export const useTheme = () => {
-  const ctx = useContext(ThemeContext);
-  if (ctx === null) {
+  const ctx = useContext(Ctx);
+  if (!ctx)
     throw new Error("[varth] useTheme must be used within a ThemeProvider");
-  }
   return ctx;
 };
 
 export const ThemeProvider = ({
   children,
-  default: defaultTheme,
+  default: def,
   themeNames,
   inject,
 }: ThemeProviderProps) => {
-  const [theme, setThemeState] = useState(() => {
-    if (typeof localStorage === "undefined") return defaultTheme;
-    return localStorage.getItem("varth-theme") ?? defaultTheme;
-  });
+  const [theme, setThemeState] = useState(() =>
+    typeof localStorage !== "undefined"
+      ? (localStorage.getItem("varth-theme") ?? def)
+      : def,
+  );
 
   const setTheme = (next: string) => {
     setThemeState(next);
@@ -44,8 +44,8 @@ export const ThemeProvider = ({
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, themeNames }}>
+    <Ctx.Provider value={{ theme, setTheme, themeNames }}>
       <div data-theme={theme}>{children}</div>
-    </ThemeContext.Provider>
+    </Ctx.Provider>
   );
 };
