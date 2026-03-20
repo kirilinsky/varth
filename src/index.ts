@@ -1,9 +1,7 @@
 import { THEME_NAME, THEME_TOKEN, VARTH } from "./constants/varth";
 import { CSSVarItem, DefineThemesConfig } from "./types";
 
-const getTokenKey = (token: string, prefix: string) => {
-  return `--${prefix}-${token}`;
-};
+const getTokenKey = (token: string, prefix: string) => `--${prefix}-${token}`;
 
 const createTheme = ({
   prefix,
@@ -14,20 +12,14 @@ const createTheme = ({
   tokens: readonly string[];
   colors?: readonly string[];
 }) => {
-  let result: Record<string, string> = {};
-  tokens.forEach((token: string, idx) => {
+  const result: Record<string, string> = {};
+  tokens.forEach((token, idx) => {
     result[getTokenKey(token, prefix)] = colors?.[idx] ?? "";
   });
   return result;
 };
 
-const getDataAttributeString = (themeName: string) =>
-  `[data-theme="${themeName}"] {\n`;
-
-const buildOneThemeString = (key: string, value: string) => {
-  return `${key}: ${value};\n`;
-};
-
+/** Define themes and get utilities for applying them */
 export const defineThemes = ({
   prefix,
   tokens,
@@ -37,6 +29,7 @@ export const defineThemes = ({
     string,
     CSSVarItem<typeof prefix, typeof tokens>
   > = {};
+
   for (const theme in themes) {
     themesObject[theme] = createTheme({
       prefix,
@@ -45,24 +38,22 @@ export const defineThemes = ({
     });
   }
 
-  const getThemeVars = (key: string) => {
-    return themesObject[key] ?? {};
-  };
+  /** Returns CSS variable object for use in style={} */
+  const getThemeVars = (key: string) => themesObject[key] ?? {};
 
+  /** Generates a CSS string with :root and [data-theme] blocks */
   const toCSS = () => {
     let first = true;
-    let root = `:root,\n`;
-    let result = ``;
+    let result = "";
+
     for (const theme in themesObject) {
       if (first) {
-        result += root;
+        result += `:root,\n`;
         first = false;
       }
-      let header = getDataAttributeString(theme);
-      result += `${header}`;
-      let themeVars = getThemeVars(theme);
-      Object.entries(themeVars).forEach(([key, value]) => {
-        result += buildOneThemeString(key, value);
+      result += `[data-theme="${theme}"] {\n`;
+      Object.entries(getThemeVars(theme)).forEach(([k, v]) => {
+        result += `${k}: ${v};\n`;
       });
       result += `}\n\n`;
     }
@@ -70,43 +61,39 @@ export const defineThemes = ({
     return result;
   };
 
+  /** Injects themes as a <style> tag into document.head. Idempotent. */
   const inject = () => {
     if (typeof document === "undefined") return;
     const tagId = `${VARTH}-${prefix}`;
-    const injected = document.getElementById(tagId);
-    const styleContent = toCSS();
-    if (injected) {
-      injected.textContent = styleContent;
+    const existing = document.getElementById(tagId);
+    const content = toCSS();
+
+    if (existing) {
+      existing.textContent = content;
       return;
     }
-    const styleTag = document.createElement("style");
-    styleTag.id = tagId;
-    styleTag.textContent = styleContent;
 
-    window.document.head.appendChild(styleTag);
+    const tag = document.createElement("style");
+    tag.id = tagId;
+    tag.textContent = content;
+    document.head.appendChild(tag);
     console.info(`[varth] 💉 injected <style id="${tagId}">`);
   };
 
-  const buildTypes = (names: string[]) => {
-    let lines = ``;
-    names.forEach((prop) => {
-      lines += `| '${prop}'\n`;
-    });
-    return lines;
-  };
+  /** Generates TypeScript type declarations for theme tokens and names */
+  const toTypes = () => {
+    const themeNames = Object.keys(themesObject);
+    const tokenNames = Object.keys(getThemeVars(themeNames[0] ?? ""));
+    const toUnion = (names: string[]) =>
+      names.map((n) => `  | '${n}'`).join("\n");
 
-  const toTypes = () => { 
-    const themes = Object.keys(themesObject);
-    const tokens = Object.keys(getThemeVars(themes[0] ?? ""));
-    let result = ``;
-
-    result += `export type ${THEME_TOKEN} =\n`;
-    result += buildTypes(tokens);
-    result += "\n\n";
-    result += `export type ${THEME_NAME} =\n`;
-    result += buildTypes(themes);
-    result += `\n\n}`;
-    return result;
+    return [
+      `export type ${THEME_TOKEN} =`,
+      toUnion(tokenNames),
+      ``,
+      `export type ${THEME_NAME} =`,
+      toUnion(themeNames),
+    ].join("\n");
   };
 
   return { getThemeVars, toCSS, inject, toTypes };

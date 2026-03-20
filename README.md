@@ -1,5 +1,7 @@
 # varth
 
+[![codecov](https://codecov.io/github/kirilinsky/varth/graph/badge.svg?token=AJLJGZVFSN)](https://codecov.io/github/kirilinsky/varth)
+
 <img src="https://i.ibb.co/ynfnTPZs/varth-logo.jpg" alt="var-th" />
 
 Type-safe CSS variable themes. Define once, use everywhere.
