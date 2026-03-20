@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { defineThemes } from "./index";
 
-describe("getThemeVars", () => {
+describe("getVarths", () => {
   it("returns correct CSS vars", () => {
-    const { getThemeVars } = defineThemes({
+    const { getVarths } = defineThemes({
       prefix: "ui",
       tokens: ["accent", "bg"] as const,
       themes: {
@@ -11,7 +11,7 @@ describe("getThemeVars", () => {
       },
     });
 
-    expect(getThemeVars("light")).toEqual({
+    expect(getVarths("light")).toEqual({
       "--ui-accent": "#ffd",
       "--ui-bg": "#000",
     });

@@ -39,7 +39,7 @@ export const defineThemes = ({
   }
 
   /** Returns CSS variable object for use in style={} */
-  const getThemeVars = (key: string) => themesObject[key] ?? {};
+  const getVarths = (key: string) => themesObject[key] ?? {};
 
   /** Generates a CSS string with :root and [data-theme] blocks */
   const toCSS = () => {
@@ -52,7 +52,7 @@ export const defineThemes = ({
         first = false;
       }
       result += `[data-theme="${theme}"] {\n`;
-      Object.entries(getThemeVars(theme)).forEach(([k, v]) => {
+      Object.entries(getVarths(theme)).forEach(([k, v]) => {
         result += `${k}: ${v};\n`;
       });
       result += `}\n\n`;
@@ -79,11 +79,11 @@ export const defineThemes = ({
     document.head.appendChild(tag);
     console.info(`[varth] 💉 injected <style id="${tagId}">`);
   };
+  const themeNames = Object.keys(themesObject);
 
   /** Generates TypeScript type declarations for theme tokens and names */
   const toTypes = () => {
-    const themeNames = Object.keys(themesObject);
-    const tokenNames = Object.keys(getThemeVars(themeNames[0] ?? ""));
+    const tokenNames = Object.keys(getVarths(themeNames[0] ?? ""));
     const toUnion = (names: string[]) =>
       names.map((n) => `  | '${n}'`).join("\n");
 
@@ -96,5 +96,5 @@ export const defineThemes = ({
     ].join("\n");
   };
 
-  return { getThemeVars, toCSS, inject, toTypes };
+  return { getVarths, toCSS, inject, toTypes, themeNames };
 };
