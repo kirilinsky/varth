@@ -10,7 +10,7 @@ export const defineThemes = ({
 }: DefineThemesConfig) => {
   const map: Record<string, CSSVarItem<typeof prefix, typeof tokens>> = {};
 
-  for (const t in themes) {
+  for (const t of Object.keys(themes)) {
     const vars: Record<string, string> = {};
     tokens.forEach((token, i) => {
       vars[key(token, prefix)] = themes[t]?.[i] ?? "";
@@ -23,7 +23,7 @@ export const defineThemes = ({
   const toCSS = () => {
     let r = "",
       first = true;
-    for (const t in map) {
+    for (const t of Object.keys(map)) {
       if (first) {
         r += `:root,\n`;
         first = false;
@@ -38,7 +38,7 @@ export const defineThemes = ({
   };
 
   const inject = () => {
-    if (typeof document === "undefined") return;
+    if (typeof document === "undefined" || !document.head) return;
     const id = `${VARTH}-${prefix}`;
     const el =
       document.getElementById(id) ??
@@ -51,11 +51,13 @@ export const defineThemes = ({
   const themeNames = Object.keys(map);
 
   const toTypes = () => {
+    if (themeNames.length === 0) return "";
+    const firstTheme = themeNames[0] as string;
     const union = (names: string[]) =>
       names.map((n) => `  | '${n}'`).join("\n");
     return [
       `export type ${THEME_TOKEN} =`,
-      union(Object.keys(getVarths(themeNames[0] ?? ""))),
+      union(Object.keys(getVarths(firstTheme))),
       ``,
       `export type ${THEME_NAME} =`,
       union(themeNames),
