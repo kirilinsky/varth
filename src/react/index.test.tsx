@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
 });
 
 const { inject, themeNames } = defineThemes({
@@ -69,5 +70,35 @@ describe("useTheme", () => {
     );
     fireEvent.click(screen.getByTestId("button-click"));
     expect(screen.getByText("current: dark")).not.toBeNull();
+  });
+
+  it("setTheme ignores invalid theme names", () => {
+    const InvalidSwitcher = () => {
+      const { theme, setTheme } = useTheme();
+      return (
+        <button data-testid="invalid" onClick={() => setTheme("nonexistent")}>
+          current: {theme}
+        </button>
+      );
+    };
+    render(
+      <ThemeProvider default="light" inject={inject} themeNames={themeNames}>
+        <InvalidSwitcher />
+      </ThemeProvider>,
+    );
+    fireEvent.click(screen.getByTestId("invalid"));
+    expect(screen.getByText("current: light")).not.toBeNull();
+  });
+
+  it("setTheme does not throw when localStorage.setItem throws", () => {
+    const original = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = () => { throw new Error("QuotaExceededError"); };
+    render(
+      <ThemeProvider default="light" inject={inject} themeNames={themeNames}>
+        <ThemeSwitcher />
+      </ThemeProvider>,
+    );
+    expect(() => fireEvent.click(screen.getByTestId("button-click"))).not.toThrow();
+    localStorage.setItem = original;
   });
 });

@@ -35,13 +35,20 @@ export const ThemeProvider = ({
   );
 
   const setTheme = (next: string) => {
+    if (!themeNames.includes(next)) return;
     setThemeState(next);
-    localStorage.setItem("varth-theme", next);
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem("varth-theme", next);
+      } catch {
+        // ignore QuotaExceededError / SecurityError
+      }
+    }
   };
 
   useEffect(() => {
     inject();
-  }, []);
+  }, [inject]);
 
   return (
     <Ctx.Provider value={{ theme, setTheme, themeNames }}>
