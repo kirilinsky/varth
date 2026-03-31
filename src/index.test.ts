@@ -99,4 +99,27 @@ describe("toTypes", () => {
     expect(toTypes()).toContain("light");
     expect(toTypes()).toContain("dark");
   });
+
+  it("returns empty string when themes is empty", () => {
+    const { toTypes: toTypesEmpty } = defineThemes({
+      prefix: "ui",
+      tokens: ["accent"] as const,
+      themes: {},
+    });
+    expect(toTypesEmpty()).toBe("");
+  });
+});
+
+describe("inject — edge cases", () => {
+  it("does nothing when document.head is null", () => {
+    const { inject } = defineThemes({
+      prefix: "edge",
+      tokens: ["accent"] as const,
+      themes: { light: ["#fff"] },
+    });
+    const original = document.head;
+    Object.defineProperty(document, "head", { value: null, configurable: true });
+    expect(() => inject()).not.toThrow();
+    Object.defineProperty(document, "head", { value: original, configurable: true });
+  });
 });
