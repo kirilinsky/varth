@@ -1,6 +1,6 @@
 {
   "name": "var-th",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Generate CSS theme variables from a configuration object.",
   "keywords": [
     "css",
