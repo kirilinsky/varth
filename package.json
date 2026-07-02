@@ -1,6 +1,6 @@
 {
   "name": "var-th",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Themes in, modern CSS out — a zero-dep CLI that compiles your theme config into light-dark() CSS, oklch ramps and a typed switcher. Nothing ships to your bundle.",
   "keywords": [
     "css",
