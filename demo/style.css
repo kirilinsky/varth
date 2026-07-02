@@ -1,0 +1,424 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  font-family: "Chalkboard SE", "Comic Sans MS", "Segoe Print", "Bradley Hand",
+    "Patrick Hand", cursive;
+  background: var(--th-bg);
+  color: var(--th-text);
+  line-height: 1.55;
+  transition:
+    background-color 0.35s,
+    color 0.35s;
+}
+
+code,
+pre {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+code {
+  font-size: 0.85em;
+  background: color-mix(in oklch, var(--th-accent) 14%, transparent);
+  border-radius: 5px;
+  padding: 0.1em 0.35em;
+}
+
+.muted {
+  color: var(--th-muted);
+}
+
+/* Hand-drawn box: uneven radii + hard offset shadow, like a marker sketch. */
+.sketch {
+  background: var(--th-surface);
+  border: 2px solid var(--th-border);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: var(--th-shadow);
+}
+
+/* --- hero ---------------------------------------------------------------- */
+
+.hero {
+  border-bottom: 2px solid var(--th-border);
+  /* pencil crosshatch */
+  background-image: repeating-linear-gradient(
+      45deg,
+      color-mix(in oklch, var(--th-text) 4%, transparent) 0 1px,
+      transparent 1px 9px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in oklch, var(--th-text) 3%, transparent) 0 1px,
+      transparent 1px 13px
+    );
+  transition: background-color 0.35s;
+}
+
+.hero-inner {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 3rem;
+}
+
+.logo {
+  max-width: min(420px, 80vw);
+  height: auto;
+  user-select: none;
+}
+
+/* Pencil → chalk: invert the graphite strokes on dark, hue-rotate restores
+   the blue. Same media + attribute fallback pattern the package emits for
+   non-color tokens. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo {
+    filter: invert(1) hue-rotate(195deg) saturate(1.15);
+  }
+}
+
+[data-theme="light"] .logo {
+  filter: none;
+}
+
+[data-theme="dark"] .logo {
+  filter: invert(1) hue-rotate(195deg) saturate(1.15);
+}
+
+h1 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.2;
+  margin: 1rem 0 0.8rem;
+  transform: rotate(-0.6deg);
+}
+
+.grad {
+  background: linear-gradient(90deg, var(--th-brand-5), var(--th-brand-7));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  max-width: 44rem;
+  color: var(--th-muted);
+  font-size: 1.05rem;
+}
+
+.hint {
+  color: var(--th-muted);
+  font-size: 0.85rem;
+  margin-top: 0.7rem;
+  transform: rotate(-0.4deg);
+}
+
+/* --- switcher -------------------------------------------------------------- */
+
+.switcher {
+  display: inline-flex;
+  margin-top: 1.4rem;
+  border: 2px solid var(--th-border);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  background: var(--th-surface);
+  padding: 0.25rem;
+  box-shadow: var(--th-shadow);
+}
+
+.switcher button {
+  font: inherit;
+  font-size: 0.95rem;
+  border: 0;
+  background: transparent;
+  color: var(--th-muted);
+  padding: 0.4rem 1.1rem;
+  border-radius: 225px 12px 255px 12px / 12px 255px 12px 225px;
+  cursor: pointer;
+}
+
+.switcher button.active {
+  background: var(--th-accent);
+  color: var(--th-accentText);
+}
+
+/* --- layout ---------------------------------------------------------------- */
+
+main {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+}
+
+section {
+  margin-top: 3rem;
+}
+
+h2 {
+  margin-bottom: 0.35rem;
+  transform: rotate(-0.5deg);
+  display: inline-block;
+  border-bottom: 3px solid
+    color-mix(in oklch, var(--th-accent) 55%, transparent);
+}
+
+section > .muted {
+  max-width: 46rem;
+  margin-bottom: 1.2rem;
+}
+
+/* --- terminal mockup (dark in both themes — a terminal is a terminal) ------ */
+
+.term {
+  background: #16191f;
+  border: 2px solid var(--th-border);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: var(--th-shadow);
+  overflow: hidden;
+  transform: rotate(-0.3deg);
+  max-width: 44rem;
+}
+
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #2a2f38;
+  color: #8b93a1;
+  font-size: 0.8rem;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.term-bar span {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: #3a4150;
+}
+
+.term-body {
+  margin: 0;
+  padding: 1rem 1.2rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #c8cfd9;
+  overflow-x: auto;
+}
+
+.t-blue {
+  color: #7fa9e0;
+}
+
+.t-green {
+  color: #7dc87d;
+}
+
+.t-dim {
+  color: #707988;
+}
+
+.t-white {
+  color: #e7ecf2;
+  font-weight: 700;
+}
+
+/* --- code panes ------------------------------------------------------------ */
+
+.panes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.2rem;
+}
+
+.pane {
+  background: var(--th-surface);
+  border: 2px solid var(--th-border);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: var(--th-shadow);
+  overflow: hidden;
+  transform: rotate(-0.3deg);
+}
+
+.pane:nth-child(2) {
+  transform: rotate(0.3deg);
+}
+
+.pane-title {
+  font-size: 0.9rem;
+  color: var(--th-muted);
+  padding: 0.6rem 1.2rem;
+  border-bottom: 2px dashed
+    color-mix(in oklch, var(--th-border) 55%, transparent);
+}
+
+.pane pre {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  padding: 1rem 1.2rem;
+  margin: 0;
+  overflow: auto;
+  max-height: 26rem;
+}
+
+/* --- cards ------------------------------------------------------------------ */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.2rem;
+}
+
+.card {
+  background: var(--th-surface);
+  color: var(--th-text);
+  border: 2px solid var(--th-border);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: var(--th-shadow);
+  padding: 1.3rem;
+  transition:
+    background-color 0.35s,
+    color 0.35s,
+    border-color 0.35s;
+}
+
+.card:nth-child(odd) {
+  transform: rotate(-0.5deg);
+}
+
+.card:nth-child(even) {
+  transform: rotate(0.5deg);
+}
+
+.card h3 {
+  margin-bottom: 0.3rem;
+}
+
+.card .muted {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.cards.why .card .muted {
+  margin-bottom: 0;
+}
+
+.recipes .pane pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ship-grid {
+  grid-template-columns: repeat(3, 1fr);
+  align-items: stretch;
+}
+
+.flow-down {
+  text-align: center;
+  font-size: 2rem;
+  color: var(--th-accent);
+  line-height: 1.2;
+  margin: 0.5rem 0;
+}
+
+.consume .pane {
+  max-width: 40rem;
+  margin: 0 auto;
+  transform: rotate(0.3deg);
+}
+
+@media (max-width: 62rem) {
+  .ship-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn {
+  font: inherit;
+  font-size: 0.95rem;
+  border: 2px solid var(--th-border);
+  background: var(--th-accent);
+  color: var(--th-accentText);
+  padding: 0.4rem 1rem;
+  border-radius: 225px 12px 255px 12px / 12px 255px 12px 225px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 color-mix(in oklch, var(--th-border) 70%, transparent);
+  transition:
+    background-color 0.35s,
+    color 0.35s,
+    transform 0.15s;
+}
+
+.btn:hover {
+  transform: translate(-1px, -1px) rotate(-0.5deg);
+}
+
+.btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+/* --- ramp -------------------------------------------------------------------- */
+
+.picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.picker input {
+  inline-size: 3.2rem;
+  block-size: 2.3rem;
+  border: 2px solid var(--th-border);
+  border-radius: 225px 12px 255px 12px / 12px 255px 12px 225px;
+  background: var(--th-surface);
+  cursor: pointer;
+  padding: 3px;
+}
+
+.ramp {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  border: 2px solid var(--th-border);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  overflow: hidden;
+  box-shadow: var(--th-shadow);
+  transform: rotate(-0.3deg);
+}
+
+.swatch {
+  aspect-ratio: 1 / 1.4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.4rem;
+}
+
+.swatch span {
+  font-size: 0.75rem;
+  color: white;
+  mix-blend-mode: difference;
+  opacity: 0.85;
+}
+
+/* --- footer -------------------------------------------------------------------- */
+
+footer {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px dashed var(--th-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+footer a {
+  color: var(--th-accent);
+}
+
+@media (max-width: 40rem) {
+  .ramp {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}

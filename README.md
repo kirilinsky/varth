@@ -3,170 +3,124 @@
 [![codecov](https://codecov.io/github/kirilinsky/varth/graph/badge.svg?token=AJLJGZVFSN)](https://codecov.io/github/kirilinsky/varth)
 [![npm downloads](https://img.shields.io/npm/dm/var-th)](https://www.npmjs.com/package/var-th)
 [![npm](https://img.shields.io/npm/v/var-th)](https://www.npmjs.com/package/var-th)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/var-th)](https://bundlephobia.com/package/var-th)
 [![license](https://img.shields.io/npm/l/var-th)](./LICENSE)
 
 <img src="https://i.ibb.co/LDRCjDTj/varth-logo-t.png" alt="var-th" />
 
-Stop writing CSS variables by hand. Define your themes as compact arrays, get type-safe utilities back. No runtime overhead, no magic — just your tokens turned into `--custom-properties` and a few helpers to apply them.
-
-## Install
+A CLI that turns one theme config into **modern CSS**. You describe your colors once — it writes the stylesheet you'd craft by hand in 2026: `light-dark()`, `color-scheme`, `@property`, oklch color ramps. Nothing from this package ships to the browser.
 
 ```bash
-npm install var-th
+npx varth init
 ```
 
----
+```
+var(−th) v0.2.0
 
-## Core
+✏ varth.config.ts scaffolded
+✓ 6 tokens · 2 themes · strategy: light-dark
+✎ varth.css  0.81 kB · gzip 0.29 kB
+✎ varth.js  1.06 kB · setTheme/getTheme, zero deps
+✎ varth.d.ts  0.29 kB · types for the module above
 
-### Setup
+  light  ██ accent  ██ bg  ██ text  ██ muted  ██ border
+  dark   ██ accent  ██ bg  ██ text  ██ muted  ██ border
 
-```ts
-import { defineThemes } from "var-th";
-
-const { getVarths, inject, toCSS, toTypes, themeNames } = defineThemes({
-  tokens: ["accent", "bg", "color", "textSm"] as const,
-  themes: {
-    light: ["#3b82f6", "#ffffff", "#111827", "16px"],
-    dark: ["#60a5fa", "#0f172a", "#f1f5f9", "16px"],
-  },
-});
+⚡ done in 23 ms
 ```
 
-`prefix` is optional and defaults to `"th"` — so your variables come out as `--th-accent`, `--th-bg`, `--th-color`, `--th-textSm` without any extra config. Set it explicitly if you want something else:
+Then, in any project — Next, Vite, plain HTML, no build at all:
 
-```ts
-defineThemes({
-  prefix: "brand",
-  tokens: ["accent", "bg"] as const,
-  themes: { ... },
-});
-// → --brand-accent, --brand-bg
-```
+1. **Link the CSS**: `import "./varth.css"` or `<link rel="stylesheet" href="varth.css">`.
+   Dark mode already works — it follows the OS via `color-scheme`, zero JavaScript.
+2. **Use tokens**: `background: var(--th-accent)`.
+3. **Switch themes** (optional): `import { setTheme } from "./varth.js"` → `setTheme("dark")`.
+   Typed via the sibling `varth.d.ts` — `setTheme("drak")` is a compile error. The choice
+   persists to `localStorage` and re-applies on load.
 
----
+Edit `varth.config.ts` → `npx varth gen` (or `gen --watch` during development). Node ≥ 22.18 reads the TS config natively.
 
-### `getVarths(name)`
+## What it generates
 
-Returns a CSS variable object ready to drop into `style={}`. The fastest way to apply a theme to any element:
-
-```tsx
-<div style={getVarths("light")}>...</div>
-
-// getVarths("light") returns:
-{
-  "--th-accent": "#3b82f6",
-  "--th-bg": "#ffffff",
-  "--th-color": "#111827",
-  "--th-textSm": "16px",
-}
-```
-
----
-
-### `inject()`
-
-Injects all themes into `<head>` once at app startup. After that, switching themes is just changing a `data-theme` attribute anywhere in the DOM — no re-renders, no JS:
-
-```ts
-inject(); // appends <style id="var-th-th"> to document.head
-```
-
-```html
-<div data-theme="dark">...</div>
-```
-
-Calling `inject()` multiple times is safe — it updates the same tag, never duplicates it.
-
----
-
-### `toCSS()`
-
-Generates a full CSS string with `:root` and `[data-theme]` blocks. Use it for SSR or static exports:
-
-```ts
-// Next.js layout.tsx
-<style dangerouslySetInnerHTML={{ __html: toCSS() }} />
-```
-
-Output:
+**`varth.css`** — one `:root` block instead of duplicated theme blocks:
 
 ```css
-:root,
-[data-theme="light"] {
-  --th-accent: #3b82f6;
-  --th-bg: #ffffff;
-  --th-color: #111827;
-  --th-textSm: 16px;
+:root {
+  color-scheme: light dark;
+  --th-accent: light-dark(#3d6fb4, #7fa9e0);
+  --th-bg: light-dark(#fdfcf7, #212932);
+  --th-radius: 8px;
 }
 
-[data-theme="dark"] {
-  --th-accent: #60a5fa;
-  --th-bg: #0f172a;
-  --th-color: #f1f5f9;
-  --th-textSm: 16px;
-}
+[data-theme="light"] { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
 ```
 
----
+- No `data-theme` attribute → the page follows the system preference, in pure CSS. FOUC is impossible by construction.
+- `data-theme` on `<html>` — or **any subtree** — forces a theme for that scope.
+- Non-color tokens that differ between themes (shadows, say) can't use `light-dark()` — they get an automatic `@media (prefers-color-scheme)` + attribute fallback. Correct in both modes, no config.
+- More than two themes, or old-browser support? `strategy: "attribute"` emits classic `[data-theme]` blocks per theme.
 
-### `toTypes()`
-
-Codegen step — run once, commit the result, get autocomplete on your CSS variables everywhere:
+**`varth.js` + `varth.d.ts`** — a ~1 kB dependency-free switcher with your theme names baked in, fully typed:
 
 ```ts
-import { writeFileSync } from "fs";
-writeFileSync("./src/theme.d.ts", toTypes());
+import { setTheme, getTheme } from "./varth.js";
+
+setTheme("dark");    // sets data-theme, persists
+setTheme("system");  // back to following the OS
+getTheme();          // "light" | "dark" | "system"
 ```
 
-Produces:
+Generated files are yours — commit them, edit them, or `out: { js: false }` them away.
+
+## Config
 
 ```ts
-export type ThemeToken =
-  | "--th-accent"
-  | "--th-bg"
-  | "--th-color"
-  | "--th-textSm";
+// varth.config.ts — import type only, no runtime dependency
+import type { VarthConfig } from "var-th";
 
-export type ThemeName = "light" | "dark";
+const config: VarthConfig = {
+  prefix: "th",              // → --th-*
+  themes: {
+    light: { accent: "#3d6fb4", bg: "#fdfcf7", radius: "8px" },
+    dark:  { accent: "#7fa9e0", bg: "#212932", radius: "8px" },
+  },
+  strategy: "auto",          // light-dark for a light/dark pair, else attribute
+  properties: "auto",        // @property for every color token → animatable
+  ramps: {
+    brand: { base: "#3d6fb4", steps: 10 },
+  },
+  storageKey: "varth-theme", // localStorage key used by varth.js
+  out: {
+    css: "varth.css",
+    js: "varth.js",          // false to skip the switcher
+  },
+};
+
+export default config;
 ```
 
----
+A theme missing a token is an error at generation time — not a silently empty variable in production.
 
-### `themeNames`
+**Ramps**: one brand color in, a palette out — `--th-brand-1..10` emitted as `oklch(from var(--th-brand) …)`. The browser derives the shades; rebranding is a one-value change.
 
-Array of all defined theme names — handy for building a theme picker:
+**`@property`**: registered color tokens are typed and animatable — `transition: background-color .2s` works across theme switches.
 
-```ts
-themeNames.map(t => (
-  <button onClick={() => setTheme(t)}>{t}</button>
-))
+## SSR / static sites
+
+`varth.js` re-applies the saved theme when it loads, which is fine for SPAs. For server-rendered or static pages that must not flash, inline this in `<head>`:
+
+```html
+<script>
+  (function(){try{var t=localStorage.getItem("varth-theme");
+  if(t&&["light","dark"].indexOf(t)>-1)document.documentElement.setAttribute("data-theme",t)}catch(e){}})()
+</script>
 ```
 
----
+## Demo
 
-## Frameworks
-
-### React
-
-```tsx
-import { ThemeProvider, useTheme } from "var-th/react";
-
-<ThemeProvider default="light" inject={inject} themeNames={themeNames}>
-  <App />
-</ThemeProvider>;
+```bash
+npm run demo   # interactive playground: config in → CSS out, live tokens, ramps
 ```
-
-```tsx
-const { theme, setTheme, themeNames } = useTheme()
-
-<button onClick={() => setTheme("dark")}>switch theme</button>
-```
-
-Theme name is persisted to `localStorage` automatically.
-
----
 
 ## License
 

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>var-th — design tokens in, modern CSS out</title>
+    <link rel="icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <img class="logo" src="./varth-logo.png" alt="var(−th)" width="420" />
+        <h1>Design tokens in, <span class="grad">modern CSS</span> out</h1>
+        <p class="tagline">
+          One typed config → <code>light-dark()</code>, <code>@property</code>,
+          oklch ramps. Zero runtime. This page is styled by its own output —
+          pencil on paper by day, chalk on board by night.
+        </p>
+        <div class="switcher" id="switcher" role="group" aria-label="Theme">
+          <button data-set="system">System</button>
+          <button data-set="light">Light</button>
+          <button data-set="dark">Dark</button>
+        </div>
+        <p class="hint">
+          “System” follows your OS — pure CSS via <code>color-scheme</code>, no
+          JS involved in the switch.
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2>Why not just write the CSS?</h2>
+        <div class="cards why">
+          <div class="card">
+            <h3>Tokens drift</h3>
+            <p class="muted">
+              Hand-written <code>--vars</code> go stale: rename one, grep,
+              pray. Here a token is a typed key — rename it and every use is a
+              <strong>compile error</strong>, not a silently dead variable.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Dark mode is a ritual</h3>
+            <p class="muted">
+              Duplicated <code>[data-theme]</code> blocks, a FOUC hack, a JS
+              listener for the system preference.
+              <code>light-dark()</code> output needs none of it — the browser
+              does the switching.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Pipelines are heavy</h3>
+            <p class="muted">
+              Style Dictionary wants a build step and a config folder. This is
+              one function call, <strong>2.6&nbsp;kB gzip</strong>, works with
+              any bundler or none.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Palettes for free</h3>
+            <p class="muted">
+              Ten shades from one brand color via oklch relative colors —
+              computed by the browser, not shipped in your bundle. Rebrand =
+              change one value.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Start in 30 seconds</h2>
+        <p class="muted">
+          One command scaffolds the config and writes the CSS. Everything
+          below on this page is what it automates:
+        </p>
+        <div class="term">
+          <div class="term-bar">
+            <span></span><span></span><span></span>&nbsp;&nbsp;zsh
+          </div>
+          <pre class="term-body"><span class="t-blue">$</span> npx varth init
+
+<span class="t-blue">var</span><span class="t-dim">(−</span><span class="t-white">th</span><span class="t-dim">)</span> <span class="t-dim">v0.2.0</span>
+
+<span class="t-green">✏</span> varth.config.ts scaffolded
+<span class="t-green">✓</span> 6 tokens · 2 themes · strategy: <span class="t-white">light-dark</span>
+<span class="t-green">✎</span> varth.css  0.81 kB · gzip 0.29 kB
+<span class="t-green">✎</span> varth.js  1.06 kB <span class="t-dim">· setTheme/getTheme, zero deps</span>
+<span class="t-green">✎</span> varth.d.ts  0.29 kB <span class="t-dim">· types for the module above</span>
+
+  <span class="t-white">light</span>  <span style="color:#3d6fb4">██</span><span class="t-dim"> accent</span>  <span style="color:#fdfcf7">██</span><span class="t-dim"> bg</span>  <span style="color:#5a5a66">██</span><span class="t-dim"> text</span>  <span style="color:#6f6f7a">██</span><span class="t-dim"> muted</span>
+  <span class="t-white">dark </span>  <span style="color:#7fa9e0">██</span><span class="t-dim"> accent</span>  <span style="color:#212932">██</span><span class="t-dim"> bg</span>  <span style="color:#e7ecf2">██</span><span class="t-dim"> text</span>  <span style="color:#9aa7b5">██</span><span class="t-dim"> muted</span>
+
+<span class="t-blue">⚡</span> done in 24 ms
+
+<span class="t-white">next steps</span>
+  1. <span class="t-blue">import "./varth.css"</span>
+  2. <span class="t-blue">background: var(--th-accent)</span> <span class="t-dim">anywhere</span>
+  3. <span class="t-blue">import { setTheme } from "./varth.js"</span> <span class="t-dim">typed, persisted, optional</span></pre>
+        </div>
+      </section>
+
+      <section>
+        <h2>In → out</h2>
+        <p class="muted">
+          Left: the actual config of this page. Right: the CSS
+          <code>varth gen</code> writes — colors folded into
+          <code>light-dark()</code>, the shadow (not a color) got an automatic
+          media-query fallback, <code>radius</code> emitted once.
+        </p>
+        <div class="panes">
+          <div class="pane">
+            <div class="pane-title">varth.config.ts</div>
+            <pre id="config-code"></pre>
+          </div>
+          <div class="pane">
+            <div class="pane-title">varth.css</div>
+            <pre id="css-out"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>One command → three files</h2>
+        <p class="muted">
+          <code>npx varth gen</code> reads the config and writes everything
+          your app needs. The files are yours: commit them, read them, no
+          runtime package in your bundle.
+        </p>
+        <div class="panes recipes ship-grid">
+          <div class="pane">
+            <div class="pane-title">varth.css · the themes</div>
+            <pre>
+:root {
+  color-scheme: light dark;
+  --th-accent: light-dark(#3d6fb4, #7fa9e0);
+  --th-bg: light-dark(#fdfcf7, #212932);
+}
+
+[data-theme="light"] { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }</pre>
+          </div>
+          <div class="pane">
+            <div class="pane-title">varth.js · the switcher, ~1 kB</div>
+            <pre>
+// theme names baked in, zero deps
+const NAMES = ["light", "dark"];
+
+export const setTheme = (theme) => { … };
+export const getTheme = () => { … };
+
+// re-applies the saved choice on import</pre>
+          </div>
+          <div class="pane">
+            <div class="pane-title">varth.d.ts · the types</div>
+            <pre>
+export type ThemeName = "light" | "dark";
+
+export declare function setTheme(
+  theme: ThemeName | "system",
+): void;
+
+// setTheme("drak") → compile error</pre>
+          </div>
+        </div>
+        <div class="flow-down" aria-hidden="true">↓</div>
+        <div class="panes recipes consume">
+          <div class="pane">
+            <div class="pane-title">your app · any framework or none</div>
+            <pre>
+&lt;link rel="stylesheet" href="varth.css"&gt;
+
+.card { background: var(--th-surface); }
+
+import { setTheme } from "./varth.js";
+setTheme("dark"); // typed, persisted
+
+&lt;!-- force a theme on any subtree --&gt;
+&lt;aside data-theme="dark"&gt;…&lt;/aside&gt;</pre>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Live tokens</h2>
+        <p class="muted">
+          Everything below uses <code>var(--th-*)</code>. Flip the theme —
+          registered <code>@property</code> tokens transition smoothly.
+        </p>
+        <div class="cards">
+          <div class="card">
+            <h3>Card</h3>
+            <p class="muted">surface, text, muted, border, shadow, radius</p>
+            <button class="btn">accent button</button>
+          </div>
+          <div class="card" data-theme="light">
+            <h3>Always light</h3>
+            <p class="muted">
+              <code>data-theme="light"</code> on this card only — scoped
+              theming, no wrapper components.
+            </p>
+            <button class="btn">accent button</button>
+          </div>
+          <div class="card" data-theme="dark">
+            <h3>Always dark</h3>
+            <p class="muted">
+              <code>data-theme="dark"</code> — <code>light-dark()</code> flips
+              per subtree via <code>color-scheme</code>.
+            </p>
+            <button class="btn">accent button</button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Ramp: one color in, palette out</h2>
+        <p class="muted">
+          <code>ramps: { brand: { base } }</code> emits
+          <code>--th-brand-1..10</code> as
+          <code>oklch(from var(--th-brand) …)</code> — the browser derives the
+          shades. Pick a new base:
+        </p>
+        <label class="picker">
+          <input type="color" id="brand-picker" value="#3b82f6" />
+          <code id="brand-value">#3b82f6</code>
+        </label>
+        <div class="ramp" id="ramp"></div>
+      </section>
+
+      <footer>
+        <code>npm install var-th</code>
+        <a href="https://github.com/kirilinsky/varth">github.com/kirilinsky/varth</a>
+      </footer>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
