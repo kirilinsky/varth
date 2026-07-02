@@ -1,7 +1,7 @@
 {
   "name": "var-th",
   "version": "0.2.0",
-  "description": "A CLI that turns one theme config into modern CSS — light-dark(), @property, oklch ramps — plus a tiny typed theme switcher. Nothing from the package ships to the browser.",
+  "description": "Themes in, modern CSS out — a zero-dep CLI that compiles your theme config into light-dark() CSS, oklch ramps and a typed switcher. Nothing ships to your bundle.",
   "keywords": [
     "css",
     "themes",

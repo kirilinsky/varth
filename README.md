@@ -7,7 +7,9 @@
 
 <img src="https://i.ibb.co/LDRCjDTj/varth-logo-t.png" alt="var-th" />
 
-A CLI that turns one theme config into **modern CSS**. You describe your colors once — it writes the stylesheet you'd craft by hand in 2026: `light-dark()`, `color-scheme`, `@property`, oklch color ramps. Nothing from this package ships to the browser.
+**Themes in. Modern CSS out. Nothing in your bundle.**
+
+A CLI that turns one theme config into the stylesheet you'd craft by hand in 2026: `light-dark()`, `color-scheme`, `@property`, oklch color ramps — plus a ~1 kB typed theme switcher. The package itself never ships to the browser.
 
 ```bash
 npx varth init
