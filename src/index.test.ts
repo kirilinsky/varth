@@ -177,7 +177,7 @@ describe("vars", () => {
   });
 });
 
-describe("setTheme / getTheme / restoreTheme", () => {
+describe("setTheme / getTheme", () => {
   const th = defineThemes(base);
 
   it("setTheme applies the attribute and persists", () => {

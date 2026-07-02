@@ -159,8 +159,8 @@ export const defineThemes = <
   };
 
   /**
-   * Inline script that applies the persisted theme before first paint.
-   * SSR twin of restoreTheme() — put it in <head> for any framework.
+   * Inline script that applies the persisted theme before first paint —
+   * the pre-paint twin of inject()'s restore step, for any SSR framework.
    */
   const themeScript = () =>
     `(function(){try{var t=localStorage.getItem(${JSON.stringify(

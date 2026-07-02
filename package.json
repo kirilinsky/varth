@@ -54,7 +54,10 @@
   },
   "homepage": "https://github.com/kirilinsky/varth#readme",
   "bin": {
-    "varth": "./bin/varth.mjs"
+    "varth": "bin/varth.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "exports": {
     ".": {
