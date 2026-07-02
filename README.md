@@ -120,8 +120,10 @@ A theme missing a token is an error at generation time — not a silently empty 
 
 ## Demo
 
+**Live: [kirilinsky.github.io/varth](https://kirilinsky.github.io/varth/)** — config in → CSS out, live tokens, ramps. Redeployed from `main` on every merge.
+
 ```bash
-npm run demo   # interactive playground: config in → CSS out, live tokens, ramps
+npm run demo   # the same playground, locally
 ```
 
 ## License

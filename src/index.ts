@@ -8,16 +8,6 @@ import {
   VarRef,
 } from "./types";
 
-export type {
-  DefineThemesConfig,
-  PropertyDef,
-  RampDef,
-  Strategy,
-  VarRef,
-  VarthConfig,
-  VarthOut,
-} from "./types";
-
 export const defineThemes = <
   Tokens extends string,
   Themes extends string,

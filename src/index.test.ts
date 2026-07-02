@@ -217,6 +217,32 @@ describe("setTheme / getTheme / restoreTheme", () => {
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
   });
 
+  it("survives a throwing localStorage on both read and write", () => {
+    const original = globalThis.localStorage;
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: {
+        getItem() {
+          throw new Error("SecurityError");
+        },
+        setItem() {
+          throw new Error("QuotaExceededError");
+        },
+      },
+    });
+    try {
+      expect(() => th.setTheme("dark")).not.toThrow();
+      expect(th.getTheme()).toBe("dark"); // attribute set, storage unreadable
+      document.documentElement.removeAttribute("data-theme");
+      expect(th.getTheme()).toBe("system");
+    } finally {
+      Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: original,
+      });
+    }
+  });
+
   it("respects a custom storageKey", () => {
     const custom = defineThemes({ ...base, storageKey: "my-key" });
     custom.setTheme("dark");

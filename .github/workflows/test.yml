@@ -24,6 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - run: npm run knip # dead code / unused deps / unused exports
       - run: npm run test:coverage
       - run: npm run build
       - run: npx publint # publish config sanity: bin paths, files field

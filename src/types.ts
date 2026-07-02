@@ -73,10 +73,6 @@ export type VarthConfig = DefineThemesConfig<string, string, string> & {
 export type VarName<P extends string, T extends string> = `--${P}-${T}`;
 export type VarRef<P extends string, T extends string> = `var(--${P}-${T})`;
 
-export type ThemeStyle<P extends string, T extends string> = {
-  [K in T as VarName<P, K>]: string;
-};
-
 export type ResolvedProperty = {
   syntax: string;
   inherits: boolean;

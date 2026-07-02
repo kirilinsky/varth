@@ -7,6 +7,17 @@ import { gzipSync } from "node:zlib";
 import { defineThemes } from "./index";
 import { VarthConfig } from "./types";
 
+// The package's public types — `varth.config.ts` imports them type-only:
+//   import type { VarthConfig } from "var-th";
+// package.json maps "." to dist/cli.d.ts (types-only, no runtime export).
+export type {
+  PropertyDef,
+  RampDef,
+  Strategy,
+  VarthConfig,
+  VarthOut,
+} from "./types";
+
 export type CliIO = {
   cwd: string;
   log: (line: string) => void;
@@ -70,6 +81,7 @@ const loadConfig = async (path: string): Promise<VarthConfig> => {
     mod = await import(`${pathToFileURL(path).href}?t=${Date.now()}`);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
+    /* v8 ignore next 5 -- only reachable on Node without type stripping */
     if (msg.includes("Unknown file extension"))
       throw new Error(
         `could not load ${path} — TypeScript configs need Node ≥ 22.18 ` +
@@ -261,6 +273,30 @@ const init = async (io: CliIO) => {
   return 0;
 };
 
+// --- watch -----------------------------------------------------------------------
+
+/** Rebuild on config change. Exported for tests; returns the FSWatcher. */
+export const watchConfig = (io: CliIO, configPath: string) => {
+  const p = paint(io.color);
+  io.log("");
+  io.log(
+    `${p.yellow("👀")} watching ${configPath.slice(io.cwd.length + 1)} — ^C to stop`,
+  );
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return watch(configPath, () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      io.log("");
+      io.log(`${p.blue("↻")} config changed`);
+      try {
+        await generate(io, configPath);
+      } catch (e) {
+        io.log(`${p.red("✗")} ${e instanceof Error ? e.message : e}`);
+      }
+    }, 50);
+  });
+};
+
 // --- main ------------------------------------------------------------------------
 
 const HELP = (color: boolean) => {
@@ -309,23 +345,10 @@ export const main = async (argv: string[], io: CliIO): Promise<number> => {
       io.log(`${p.dim("▸")} ${configPath.slice(io.cwd.length + 1)}`);
       await generate(io, configPath);
 
+      /* v8 ignore next 4 -- interactive path, runs until ^C; watchConfig itself is covered */
       if (flags.includes("--watch")) {
-        io.log("");
-        io.log(`${p.yellow("👀")} watching ${configPath.slice(io.cwd.length + 1)} — ^C to stop`);
-        let timer: ReturnType<typeof setTimeout> | undefined;
-        watch(configPath, () => {
-          clearTimeout(timer);
-          timer = setTimeout(async () => {
-            io.log("");
-            io.log(`${p.blue("↻")} config changed`);
-            try {
-              await generate(io, configPath);
-            } catch (e) {
-              io.log(`${p.red("✗")} ${e instanceof Error ? e.message : e}`);
-            }
-          }, 50);
-        });
-        await new Promise(() => {}); // run until ^C
+        watchConfig(io, configPath);
+        await new Promise(() => {});
       }
       return 0;
     }

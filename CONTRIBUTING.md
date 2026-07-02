@@ -22,6 +22,7 @@ npm install
 npm test              # run tests
 npm run test:coverage # tests + coverage report
 npm run typecheck     # tsc --noEmit
+npm run knip          # dead code / unused deps / unused exports
 npm run build         # build dist/cli.mjs
 npm run dev           # build in watch mode
 npm run demo          # interactive playground (vite)
@@ -64,13 +65,21 @@ Notes that save review rounds:
 - CLI tests run in a node environment (`// @vitest-environment node` pragma); core tests use happy-dom.
 - Generated-file changes (`varth.css` / `varth.js` / `varth.d.ts` shape) should update the README examples and `demo/` panes in the same PR.
 
-## Releasing (maintainers)
+## Changesets & releasing
+
+Every user-facing PR needs a changeset (changeset-bot will remind you):
 
 ```bash
-npm run release   # npm version patch + push --follow-tags
+npx changeset   # pick bump level, describe the change
 ```
 
-The `publish` workflow builds, tests and publishes to npm with provenance on every `v*` tag. Requires the `NPM_TOKEN` repo secret.
+Release flow, fully automated via `changesets/action`:
+
+1. PRs with changesets merge into `main`.
+2. The `release` workflow opens/updates a **Version Packages** PR (version bump + CHANGELOG).
+3. Merging that PR publishes to npm via OIDC trusted publishing (no token; `prepublishOnly` runs typecheck → build → publint) and pushes the git tag.
+
+One-time setup on npmjs.com: package → Settings → Trusted Publisher → GitHub `kirilinsky/varth`, workflow `release.yml`.
 
 ## Issues & discussion
 

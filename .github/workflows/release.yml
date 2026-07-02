@@ -1,0 +1,32 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+
+concurrency: release-${{ github.ref }}
+
+permissions:
+  contents: write # changesets/action commits the version bump + tags
+  pull-requests: write # …and opens the "Version Packages" PR
+  id-token: write # npm trusted publishing (OIDC) + provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci
+      # With pending changesets: opens/updates the "Version Packages" PR.
+      # After that PR is merged: publishes to npm (OIDC, no token) and tags.
+      - uses: changesets/action@v1
+        with:
+          version: npx changeset version
+          publish: npx changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

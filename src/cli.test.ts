@@ -3,8 +3,8 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
-import { main, CliIO } from "./cli";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { main, watchConfig, CliIO } from "./cli";
 
 const dirs: string[] = [];
 
@@ -87,6 +87,83 @@ describe("varth gen", () => {
     expect(code).toBe(1);
     expect(io.lines.join("\n")).toContain('"themes" field');
   });
+
+  it("fails cleanly on a config that does not parse", async () => {
+    const io = await makeIO();
+    await writeFile(join(io.cwd, "varth.config.mjs"), "export default {{{\n");
+    const code = await main(["gen"], io);
+    expect(code).toBe(1);
+    expect(io.lines.join("\n")).toContain("could not load");
+  });
+
+  it("uses default out paths and skips swatches for non-hex colors", async () => {
+    const io = await makeIO();
+    await writeFile(
+      join(io.cwd, "varth.config.mjs"),
+      `export default { themes: {
+        light: { accent: "#3af", text: "rebeccapurple" },
+        dark: { accent: "#a3f", text: "white" },
+      } };\n`,
+    );
+    const code = await main(["gen"], io);
+    expect(code).toBe(0);
+    expect(existsSync(join(io.cwd, "varth.css"))).toBe(true);
+    expect(existsSync(join(io.cwd, "varth.js"))).toBe(true);
+    const out = io.lines.join("\n");
+    expect(out).toContain("██ accent"); // 3-digit hex → swatch
+    expect(out).not.toContain("██ text"); // named color → no swatch
+  });
+});
+
+describe("varth gen --watch", () => {
+  it("regenerates when the config changes", async () => {
+    const io = await makeIO();
+    const configPath = join(io.cwd, "varth.config.mjs");
+    await writeFile(configPath, MJS_CONFIG);
+    const { mkdir } = await import("node:fs/promises");
+    await mkdir(join(io.cwd, "out"));
+
+    const watcher = watchConfig(io, configPath);
+    try {
+      await writeFile(configPath, MJS_CONFIG.replace("#3d6fb4", "#ff0000"));
+      await vi.waitFor(
+        () => {
+          expect(io.lines.join("\n")).toContain("config changed");
+        },
+        { timeout: 3000 },
+      );
+      await vi.waitFor(
+        async () => {
+          const css = await readFile(join(io.cwd, "out/theme.css"), "utf8");
+          expect(css).toContain("#ff0000");
+        },
+        { timeout: 3000 },
+      );
+    } finally {
+      watcher.close();
+    }
+  });
+
+  it("reports errors from a broken edit without dying", async () => {
+    const io = await makeIO();
+    const configPath = join(io.cwd, "varth.config.mjs");
+    await writeFile(configPath, MJS_CONFIG);
+    const { mkdir } = await import("node:fs/promises");
+    await mkdir(join(io.cwd, "out"));
+
+    const watcher = watchConfig(io, configPath);
+    try {
+      await writeFile(configPath, "export default {{{\n");
+      await vi.waitFor(
+        () => {
+          expect(io.lines.join("\n")).toContain("could not load");
+        },
+        { timeout: 3000 },
+      );
+    } finally {
+      watcher.close();
+    }
+  });
 });
 
 describe("varth init", () => {
@@ -122,6 +199,16 @@ describe("varth init", () => {
     await main(["init"], io);
     expect(io.lines.join("\n")).toContain('import "./varth.css"');
   });
+
+  it("detects react without a bundler", async () => {
+    const io = await makeIO();
+    await writeFile(
+      join(io.cwd, "package.json"),
+      JSON.stringify({ dependencies: { react: "^19.0.0" } }),
+    );
+    await main(["init"], io);
+    expect(io.lines.join("\n")).toContain("entry module");
+  });
 });
 
 describe("misc", () => {
@@ -137,5 +224,22 @@ describe("misc", () => {
     const code = await main(["frobnicate"], io);
     expect(code).toBe(1);
     expect(io.lines.join("\n")).toContain("usage");
+  });
+
+  it("no command → help + exit 1; explicit help → exit 0", async () => {
+    const none = await makeIO();
+    expect(await main([], none)).toBe(1);
+    expect(none.lines.join("\n")).toContain("usage");
+
+    const helped = await makeIO();
+    expect(await main(["--help"], helped)).toBe(0);
+    expect(helped.lines.join("\n")).toContain("varth gen --watch");
+  });
+
+  it("paints with ANSI codes when color is on", async () => {
+    const io = await makeIO();
+    io.color = true;
+    await main(["--help"], io);
+    expect(io.lines.join("\n")).toContain("\x1b[34m");
   });
 });
