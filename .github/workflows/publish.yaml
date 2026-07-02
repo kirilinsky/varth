@@ -6,7 +6,8 @@ on:
       - "v*"
 
 permissions:
-  id-token: write
+  contents: read
+  id-token: write # npm provenance
 
 jobs:
   publish:
@@ -16,9 +17,11 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
+          cache: npm
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
-      - run: npm run build
-      - run: npm publish
+      - run: npm test
+      # prepublishOnly runs typecheck + build
+      - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
