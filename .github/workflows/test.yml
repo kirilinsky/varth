@@ -1,17 +1,42 @@
-name: test
+name: CI
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          # floor we support: native TS config stripping needs >= 22.18
+          node-version: 22
+          cache: npm
       - run: npm ci
-      - run: npm test -- --coverage
-      - uses: codecov/codecov-action@v4
+      - run: npm run typecheck
+      - run: npm run knip # dead code / unused deps / unused exports
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npx publint # publish config sanity: bin paths, files field
+      - name: Smoke the CLI end-to-end
+        run: |
+          dir="$(mktemp -d)"
+          cd "$dir"
+          node "$GITHUB_WORKSPACE/bin/varth.mjs" init
+          node "$GITHUB_WORKSPACE/bin/varth.mjs" gen
+          test -f varth.css && test -f varth.js && test -f varth.d.ts
+          grep -q "light-dark(" varth.css
+      - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
